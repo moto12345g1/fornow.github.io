@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Last Days — Katana Glass</title>
+  <meta name="description" content="A sleek dark glass-style page counting down to my last working day (Jio Private Limited) and last day in Mumbai." />
+  <!-- Google Font (falls back to system if blocked) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-0: #050507;
+      --bg-1: #0b0c0d;
+      --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.02);
+      --accent-cold: #66f6ff; /* mumbai / cool */
+      --accent-warm: #ff7ab6; /* company / warm, bittersweet */
+      --accent-mid: #63e6be;
+      --muted: rgba(230,235,246,0.22);
+      --text: #e9eef6;
+      --radius: 18px;
+      --glass-border: rgba(255,255,255,0.04);
+      --shadow: 0 16px 60px rgba(0,0,0,0.6);
+      --glass-blur: 10px;
+      --ease: cubic-bezier(.2,.9,.3,1);
+      --blade: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;display:flex;align-items:center;justify-content:center;
+      background: radial-gradient(800px 400px at 10% 20%, rgba(12,14,16,0.6), transparent 8%),
+                  radial-gradient(700px 350px at 95% 80%, rgba(9,10,12,0.55), transparent 6%),
+                  var(--bg-0);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      padding:40px;
+    }
+
+    /* Container */
+    .wrap{width:100%;max-width:1100px;display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:start}
+    @media (max-width:980px){.wrap{grid-template-columns:1fr;gap:20px}}
+
+    /* Main card (left) */
+    .stage{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:calc(var(--radius) + 6px);
+      padding:28px;border:1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur)) saturate(130%);
+      box-shadow:var(--shadow);
+      position:relative;overflow:hidden;
+    }
+    .stage::before{ /* subtle vignette */
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(180deg, rgba(0,0,0,0.15), rgba(255,255,255,0.01));
+      pointer-events:none;border-radius:inherit;mix-blend-mode:overlay;
+    }
+
+    /* decorative katana blade */
+    .blade{
+      position:absolute;right:-60px;top:-120px;width:420px;height:420px;
+      transform:rotate(18deg);filter:blur(18px);opacity:0.12;mix-blend-mode:screen;pointer-events:none;
+      background:conic-gradient(from 200deg at 50% 50%, rgba(255,255,255,0.08), rgba(255,255,255,0.01));
+      border-radius:50%;
+    }
+
+    header{display:flex;align-items:center;gap:16px}
+    .logo{
+      width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.04);
+      font-weight:800;font-size:18px;letter-spacing:0.8px;color:var(--muted);
+      backdrop-filter:blur(6px);
+    }
+    h1{font-size:20px;margin:0}
+    p.lead{color:var(--muted);margin-top:6px}
+
+    /* toggles */
+    .controls{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+    .btn{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:999px;font-weight:600;cursor:pointer;transition:all 260ms var(--ease);backdrop-filter:blur(6px)}
+    .btn:hover{transform:translateY(-4px)}
+    .btn.active{background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 6px 30px rgba(0,0,0,0.45);border-color:rgba(255,255,255,0.06)}
+
+    /* Countdown tiles */
+    .grid-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
+    @media (max-width:580px){.grid-tiles{grid-template-columns:1fr}}
+    .tile{
+      border-radius:14px;padding:18px;border:1px solid rgba(255,255,255,0.03);
+      background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));backdrop-filter:blur(6px);
+      transition:transform 420ms var(--ease), box-shadow 420ms var(--ease);
+      position:relative;overflow:hidden;cursor:default
+    }
+    .tile:hover{transform:translateY(-8px);box-shadow:0 14px 40px rgba(0,0,0,0.5)}
+    .tag{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);display:inline-block;border:1px solid rgba(255,255,255,0.03)}
+    .date{margin-top:10px;color:var(--muted);font-size:13px}
+    .big{font-size:34px;font-weight:800;margin-top:8px;letter-spacing:0.6px}
+    .sub{font-size:13px;color:var(--muted);margin-top:8px}
+
+    /* right column - detail pane */
+    .panel{
+      background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      border-radius:calc(var(--radius));padding:20px;border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(8px);
+      min-height:260px;position:relative;overflow:hidden
+    }
+    .mood{font-weight:700;font-size:18px}
+    .desc{color:var(--muted);margin-top:8px;font-size:14px}
+
+    /* lighting overlay variations */
+    .light{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:0;transition:opacity 600ms var(--ease)}
+    .light.show{opacity:1}
+
+    .light.mumbai{background: radial-gradient(400px 200px at 10% 20%, rgba(80,200,255,0.06), transparent 12%),
+                                 radial-gradient(300px 140px at 95% 85%, rgba(120,240,255,0.03), transparent 6%)}
+    .light.company{background: radial-gradient(420px 220px at 28% 18%, rgba(255,122,182,0.06), transparent 12%),
+                                  radial-gradient(260px 120px at 80% 72%, rgba(255,140,180,0.03), transparent 6%)}
+
+    /* neon rim / stroke that animates */
+    .rim{position:absolute;inset:12px;border-radius:12px;padding:0;margin:0;pointer-events:none;}
+    .rim::after{content:'';position:absolute;inset:0;border-radius:12px;padding:1px;background:linear-gradient(90deg,var(--accent-cold),var(--accent-warm));mix-blend-mode:screen;filter:blur(8px);opacity:0.25;transform:scale(1.02);}
+
+    /* animated sheen */
+    .sheen{position:absolute;left:-40%;top:-30%;width:70%;height:180%;transform:rotate(-18deg);background:linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 48%, rgba(255,255,255,0.02) 52%, transparent 100%);opacity:0.6;animation:sheen 4.6s linear infinite}
+    @keyframes sheen{from{transform:translateX(-100%) rotate(-18deg)}to{transform:translateX(200%) rotate(-18deg)}}
+
+    /* particle glints canvas */
+    #glints{position:absolute;inset:0;pointer-events:none}
+
+    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+
+    /* tiny helpers */
+    .muted{color:var(--muted)}
+
+    /* animation for numbers */
+    .big .n{display:inline-block;transform-origin:center;transition:transform 360ms var(--ease)}
+    .big.changed .n{transform:translateY(-4px)}
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="stage" id="stage">
+      <div class="blade" aria-hidden></div>
+      <header>
+        <div class="logo">KD</div>
+        <div>
+          <h1>My Last Days — Katana Glass</h1>
+          <p class="lead">A sleek, dark, glass-effect farewell — cinematic, quiet, razor-sharp.</p>
+        </div>
+      </header>
+
+      <div class="controls" role="tablist" aria-label="Views">
+        <button class="btn active" id="view-company" data-view="company">🏢 Jio Private Limited</button>
+        <button class="btn" id="view-mumbai" data-view="mumbai">📍 Mumbai</button>
+        <div style="flex:1"></div>
+        <button class="btn" id="toggle-glints" title="Toggle micro-glints">✨ Glints</button>
+      </div>
+
+      <div class="grid-tiles" style="margin-top:20px">
+        <div class="tile" id="tile-company" data-kind="company">
+          <div class="tag">🏢 Last working day</div>
+          <div class="date">Jio Private Limited — Oct 27, 2025 • 5:00 PM IST</div>
+          <div class="big" style="margin-top:6px"><span class="n" id="c-days">0d</span>&nbsp;<span class="n" id="c-hours">0h</span>&nbsp;<span class="n" id="c-mins">0m</span></div>
+          <div class="sub">The last sign-off, the final desk light, the elevator door closing.</div>
+        </div>
+
+        <div class="tile" id="tile-mumbai" data-kind="mumbai">
+          <div class="tag">📍 Last day in</div>
+          <div class="date">Mumbai — Oct 29, 2025 • 6:00 PM IST</div>
+          <div class="big" style="margin-top:6px"><span class="n" id="m-days">0d</span>&nbsp;<span class="n" id="m-hours">0h</span>&nbsp;<span class="n" id="m-mins">0m</span></div>
+          <div class="sub">A city of lights and monsoons — one more goodbye to the shore.</div>
+        </div>
+      </div>
+
+      <footer>Every tick is a pulse — made with a little bitterness and a lot of style.</footer>
+
+      <div class="light company" id="light-company"></div>
+      <div class="light mumbai" id="light-mumbai"></div>
+      <div class="rim" aria-hidden></div>
+      <div class="sheen" aria-hidden></div>
+      <canvas id="glints"></canvas>
+    </main>
+
+    <aside class="panel" id="panel">
+      <div class="mood" id="panel-title">Jio Private Limited — Final Sign-off</div>
+      <div class="desc" id="panel-desc">Quiet, focused, the last "send" and a soft step out. Click the other tile to see Mumbai's mood.</div>
+
+      <div style="height:18px"></div>
+
+      <div style="display:flex;gap:10px;align-items:center">
+        <div style="flex:1">
+          <div style="font-size:12px;color:var(--muted)">Countdown</div>
+          <div style="font-weight:800;font-size:22px;margin-top:6px" id="panel-count">0d 0h 0m</div>
+        </div>
+        <div style="width:120px;text-align:right">
+          <div style="font-size:12px;color:var(--muted)">Status</div>
+          <div style="font-weight:700;margin-top:6px;color:var(--accent-mid)" id="panel-status">Stately</div>
+        </div>
+      </div>
+
+      <div style="height:18px"></div>
+
+      <div style="font-size:13px;color:var(--muted)">Lighting mode</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn" id="set-company-light">Warm goodbye</button>
+        <button class="btn" id="set-mumbai-light">Cool shore</button>
+      </div>
+
+      <div style="height:18px"></div>
+
+      <div style="font-size:13px;color:var(--muted)">Notes</div>
+      <textarea id="note" placeholder="Write a short memory or message..." style="width:100%;height:100px;margin-top:8px;border-radius:10px;padding:12px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.03);color:var(--text);resize:none"></textarea>
+    </aside>
+  </div>
+
+  <script>
+    /* --------- Configuration (dates from user) --------- */
+    const companyDate = new Date('2025-10-27T17:00:00+05:30'); // Oct 27 2025 5 PM IST
+    const mumbaiDate  = new Date('2025-10-29T18:00:00+05:30'); // Oct 29 2025 6 PM IST
+
+    /* DOM refs */
+    const cDays = document.getElementById('c-days');
+    const cHours = document.getElementById('c-hours');
+    const cMins = document.getElementById('c-mins');
+    const mDays = document.getElementById('m-days');
+    const mHours = document.getElementById('m-hours');
+    const mMins = document.getElementById('m-mins');
+    const panelTitle = document.getElementById('panel-title');
+    const panelDesc = document.getElementById('panel-desc');
+    const panelCount = document.getElementById('panel-count');
+    const panelStatus = document.getElementById('panel-status');
+
+    /* Toggle and light elements */
+    const viewCompany = document.getElementById('view-company');
+    const viewMumbai  = document.getElementById('view-mumbai');
+    const lightCompany = document.getElementById('light-company');
+    const lightMumbai = document.getElementById('light-mumbai');
+    const tileCompany = document.getElementById('tile-company');
+    const tileMumbai = document.getElementById('tile-mumbai');
+
+    const glintsCanvas = document.getElementById('glints');
+    const toggleGlints = document.getElementById('toggle-glints');
+
+    let activeView = 'company';
+
+    /* ------- countdown logic ------- */
+    function msToDHm(ms){
+      if(ms <= 0) return {d:0,h:0,m:0,ended:true};
+      const totalMins = Math.floor(ms/60000);
+      const d = Math.floor(totalMins / (60*24));
+      const h = Math.floor((totalMins % (60*24)) / 60);
+      const m = totalMins % 60;
+      return {d,h,m,ended:false};
+    }
+
+    function updateAll(){
+      const now = new Date();
+      const c = msToDHm(companyDate - now);
+      const m = msToDHm(mumbaiDate - now);
+      cDays.textContent = c.d + 'd'; cHours.textContent = c.h + 'h'; cMins.textContent = c.m + 'm';
+      mDays.textContent = m.d + 'd'; mHours.textContent = m.h + 'h'; mMins.textContent = m.m + 'm';
+
+      // panel content updates based on active view
+      const activeDate = (activeView === 'company') ? companyDate : mumbaiDate;
+      const a = msToDHm(activeDate - now);
+      panelCount.textContent = `${a.d}d ${a.h}h ${a.m}m`;
+      panelStatus.textContent = a.ended ? 'Passed' : 'Stately';
+
+      // small animation flag when number changes
+      [tileCompany, tileMumbai].forEach(t=>t.classList.remove('changed'));
+      setTimeout(()=>{[tileCompany, tileMumbai].forEach(t=>t.classList.remove('changed'))},300);
+    }
+
+    // Run every 20s (we update immediately and often enough)
+    updateAll();
+    setInterval(updateAll, 20000);
+
+    /* ------- view switching & lighting ------- */
+    function setActive(view){
+      activeView = view;
+      // buttons
+      [viewCompany, viewMumbai].forEach(b=>b.classList.remove('active'));
+      if(view === 'company') viewCompany.classList.add('active'); else viewMumbai.classList.add('active');
+
+      // tile hover emphasis
+      tileCompany.style.transform = view === 'company' ? 'translateY(-6px) scale(1.01)' : 'none';
+      tileMumbai.style.transform  = view === 'mumbai' ? 'translateY(-6px) scale(1.01)' : 'none';
+
+      // panel copy
+      if(view === 'company'){
+        panelTitle.textContent = 'Jio Private Limited — Final Sign-off';
+        panelDesc.textContent  = 'Quiet, focused, the last "send" and a soft step out. The office lights go dim.';
+        lightCompany.classList.add('show'); lightMumbai.classList.remove('show');
+        document.documentElement.style.setProperty('--accent-mid', 'var(--accent-warm)');
+      } else {
+        panelTitle.textContent = 'Mumbai — One Last Shoreline';
+        panelDesc.textContent  = 'Salt air, the city hums, and you pack a handful of memories. The light cools.';
+        lightMumbai.classList.add('show'); lightCompany.classList.remove('show');
+        document.documentElement.style.setProperty('--accent-mid', 'var(--accent-cold)');
+      }
+
+      updateAll();
+    }
+
+    viewCompany.addEventListener('click', ()=>setActive('company'));
+    viewMumbai.addEventListener('click', ()=>setActive('mumbai'));
+    tileCompany.addEventListener('click', ()=>setActive('company'));
+    tileMumbai.addEventListener('click', ()=>setActive('mumbai'));
+
+    // manual lighting buttons
+    document.getElementById('set-company-light').addEventListener('click', ()=>{setActive('company')});
+    document.getElementById('set-mumbai-light').addEventListener('click', ()=>{setActive('mumbai')});
+
+    /* ------- micro glints effect (canvas) ------- */
+    let glintsOn = true;
+    toggleGlints.addEventListener('click', ()=>{
+      glintsOn = !glintsOn; glintsCanvas.style.opacity = glintsOn ? 1 : 0; toggleGlints.classList.toggle('active', glintsOn);
+    });
+
+    // canvas setup
+    const ctx = glintsCanvas.getContext('2d');
+    function resizeCanvas(){
+      glintsCanvas.width = glintsCanvas.offsetWidth * devicePixelRatio;
+      glintsCanvas.height = glintsCanvas.offsetHeight * devicePixelRatio;
+      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // particles
+    const particles = [];
+    function spawn(){
+      if(!glintsOn) return;
+      const w = glintsCanvas.offsetWidth; const h = glintsCanvas.offsetHeight;
+      for(let i=0;i<6;i++){
+        particles.push({x: Math.random()*w, y: Math.random()*h, r: Math.random()*2 + 0.6, life: Math.random()*1500+800, t:0, vx: (Math.random()-0.5)*0.6, vy:(Math.random()-0.5)*0.6});
+      }
+    }
+
+    function tick(dt){
+      ctx.clearRect(0,0,glintsCanvas.width,glintsCanvas.height);
+      for(let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+        p.t += dt;
+        p.x += p.vx * dt * 0.04; p.y += p.vy * dt * 0.04;
+        const alpha = Math.max(0, 1 - p.t/(p.life));
+        if(alpha <= 0.02){ particles.splice(i,1); continue; }
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255,255,255,${alpha*0.9})`;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fill();
+        // subtle streak
+        ctx.beginPath(); ctx.moveTo(p.x - p.vx*4, p.y - p.vy*4); ctx.lineTo(p.x + p.vx*6, p.y + p.vy*6);
+        ctx.strokeStyle = `rgba(255,255,255,${alpha*0.12})`; ctx.lineWidth=1; ctx.stroke();
+      }
+    }
+
+    let last = performance.now();
+    function loop(t){
+      const dt = t - last; last = t;
+      if(glintsOn && Math.random() < 0.06) spawn();
+      tick(dt);
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    /* ------- initial view & accessibility tweaks ------- */
+    setActive('company');
+
+    // keyboard nav: 1 for company, 2 for mumbai
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === '1') setActive('company');
+      if(e.key === '2') setActive('mumbai');
+    });
+
+    // make sure canvas is sized after fonts load
+    window.addEventListener('load', ()=>{resizeCanvas(); updateAll();});
+
+    /* ------- small polish: animate number changes when they change over time ------- */
+    let lastC = null, lastM = null;
+    setInterval(()=>{
+      const now = new Date();
+      const c = msToDHm(companyDate - now);
+      const m = msToDHm(mumbaiDate - now);
+      const curC = `${c.d}-${c.h}-${c.m}`;
+      const curM = `${m.d}-${m.h}-${m.m}`;
+      if(curC !== lastC){ tileCompany.classList.add('changed'); lastC = curC; }
+      if(curM !== lastM){ tileMumbai.classList.add('changed'); lastM = curM; }
+      // update displayed numbers (in case interval missed)
+      cDays.textContent = c.d + 'd'; cHours.textContent = c.h + 'h'; cMins.textContent = c.m + 'm';
+      mDays.textContent = m.d + 'd'; mHours.textContent = m.h + 'h'; mMins.textContent = m.m + 'm';
+      // panel update
+      const activeDate = (activeView === 'company') ? companyDate : mumbaiDate;
+      const a = msToDHm(activeDate - now);
+      panelCount.textContent = `${a.d}d ${a.h}h ${a.m}m`;
+    }, 15000);
+
+    /* ------- small UX: persist note to localStorage ------- */
+    const noteEl = document.getElementById('note');
+    noteEl.value = localStorage.getItem('lastDays.note') || '';
+    noteEl.addEventListener('input', ()=> localStorage.setItem('lastDays.note', noteEl.value));
+
+  </script>
+</body>
+</html>
